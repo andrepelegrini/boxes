@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "WhatsApp Web service for Project Boxes",
   "main": "server.js",
+  "bin": "server.js",
   "scripts": {
+    "build": "echo \"no build step (JS service)\"",
     "start": "node server.js",
     "dev": "node server.js"
   },
@@ -15,6 +17,16 @@
     "whatsapp-web.js": "^1.23.0"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
+  },
+  "pkg": {
+    "scripts": ["server.js"],
+    "assets": [],
+    "targets": [
+      "node18-macos",
+      "node18-linux-x64",
+      "node18-win-x64"
+    ],
+    "outputPath": "../src-tauri/bin"
   }
 }

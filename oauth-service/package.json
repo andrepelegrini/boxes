@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "OAuth service using Express and Passport for Project Boxes",
   "main": "server.js",
+  "bin": "server.js",
   "type": "module",
   "scripts": {
+    "build": "echo \"no build step (JS service)\"",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
@@ -29,5 +31,15 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "pkg": {
+    "scripts": ["server.js"],
+    "assets": [],
+    "targets": [
+      "node18-macos",
+      "node18-linux-x64",
+      "node18-win-x64"
+    ],
+    "outputPath": "../src-tauri/bin"
   }
 }
