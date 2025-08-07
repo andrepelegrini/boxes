@@ -1,0 +1,75 @@
+# .github/workflows/build-binaries.yml
+name: Build micro-service binaries (macOS-Linux-Windows)
+
+on:
+  push:
+    branches: [ feature/binarize-* ]
+  pull_request:
+
+jobs:
+  pkg:
+    # 3 SO × 6 serviços = 18 jobs
+    strategy:
+      fail-fast: false
+      matrix:
+        os:   [macos-latest, ubuntu-latest, windows-latest]
+        service:
+          - ai-service
+          - database-service
+          - oauth-service
+          - queue-service
+          - socket-service
+          - whatsapp-service
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash         # GitHub fornece Bash também no runner Windows
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚡ Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.service }}/node_modules
+          key:  ${{ runner.os }}-node20-${{ hashFiles(format('{0}/package-lock.json', matrix.service)) }}
+
+      - name: 🔧 Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📜 Build TypeScript
+        working-directory: ${{ matrix.service }}
+        run: |
+          npm ci
+          npm run build
+
+      # Define o alvo correto (macos / linux / win) e sufixo .exe p/ Windows
+      - name: 🏷️  Set env PKG_TARGET / SUFFIX
+        run: |
+          case "${{ runner.os }}" in
+            macOS)   echo "PKG_TARGET=node20-macos"      >> "$GITHUB_ENV";;
+            Linux)   echo "PKG_TARGET=node20-linux-x64"  >> "$GITHUB_ENV";;
+            Windows) echo "PKG_TARGET=node20-win-x64"    >> "$GITHUB_ENV"; \
+                     echo "EXE_SUFFIX=.exe"             >> "$GITHUB_ENV";;
+          esac
+
+      - name: 🛠️  Generate binary
+        working-directory: ${{ matrix.service }}
+        run: |
+          npx pkg . \
+            --targets $PKG_TARGET \
+            --compress Brotli \
+            --out-path ../src-tauri/bin
+          mv ../src-tauri/bin/${{ matrix.service }}$EXE_SUFFIX \
+             ../src-tauri/bin/${{ matrix.service }}-${{ runner.os }}$EXE_SUFFIX
+
+      - name: ⤴️  Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}-${{ runner.os }}
+          path: src-tauri/bin/${{ matrix.service }}-${{ runner.os }}*
