@@ -27,10 +27,8 @@ jobs:
       - name: 🚚 Move sidecars to src-tauri/bin
         run: |
           mkdir -p src-tauri/bin
-          for d in sidecars/*-${{ runner.os }}*; do
-            mv "$d"/* src-tauri/bin/
-          done
-          chmod +x src-tauri/bin/*
+          find sidecars -type f -name "*-${{ runner.os }}*" -exec mv {} src-tauri/bin/ \;
+          chmod +x src-tauri/bin/* || true
 
       - name: ⚙️ Setup Node 18
         uses: actions/setup-node@v4
