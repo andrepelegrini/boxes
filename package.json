@@ -1,8 +1,11 @@
 {
   "name": "project-boxes---basecamp-clone",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -19,7 +22,7 @@
     "services:clean-start": "npm run kill-ports && npm run services:start",
     "services:clean-start:orchestrated": "node scripts/start-services-orchestrated.js",
     "service:database": "cd database-service && npm run dev",
-    "service:ai": "cd ai-service && npm run dev", 
+    "service:ai": "cd ai-service && npm run dev",
     "service:oauth": "cd oauth-service && npm run dev",
     "service:queue": "cd queue-service && npm run dev",
     "service:slack": "cd slack-service && npm run dev",
@@ -58,14 +61,11 @@
     "remark-gfm": "^4.0.0",
     "socket.io-client": "^4.8.1",
     "concurrently": "^8.2.2",
-    "specta": "^0.0.0",
     "tailwind-merge": "^3.3.1",
-    "tauri-specta": "^0.0.2",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.5.0",
-    "@tauri-apps/cli-darwin-arm64": "^2.5.0",
     "@types/node": "^22.14.0",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
