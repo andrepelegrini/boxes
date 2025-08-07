@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Boxes</title>
+</head>
+<body class="bg-background text-foreground antialiased">
+  <div id="root"></div>
+  <script>
+    // Track when the page starts loading
+    console.log(`[${new Date().toISOString()}] 🌐 [HTML] Page loading started`);
+    
+    // Track when DOM content is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log(`[${new Date().toISOString()}] 🌐 [HTML] DOM content loaded`);
+    });
+    
+    // Track when page is fully loaded
+    window.addEventListener('load', () => {
+      console.log(`[${new Date().toISOString()}] 🌐 [HTML] Page fully loaded`);
+    });
+    
+    // Monitor for React mounting
+    const checkReactMount = () => {
+      const root = document.getElementById('root');
+      if (root && root.children.length > 0) {
+        console.log(`[${new Date().toISOString()}] ✅ [HTML] React app mounted successfully`);
+        clearInterval(reactMountCheck);
+      }
+    };
+    
+    const reactMountCheck = setInterval(checkReactMount, 100);
+    
+    // Stop checking after 10 seconds
+    setTimeout(() => {
+      clearInterval(reactMountCheck);
+      const root = document.getElementById('root');
+      if (!root || root.children.length === 0) {
+        console.error(`[${new Date().toISOString()}] ❌ [HTML] React app failed to mount within 10 seconds`);
+      }
+    }, 10000);
+  </script>
+  <script type="module" src="./index.tsx"></script>
+</body>
+</html>

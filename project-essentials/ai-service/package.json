@@ -1,0 +1,31 @@
+{
+  "name": "ai-service",
+  "version": "1.0.0",
+  "description": "AI/LLM service using LangChain for Project Boxes",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "langchain": "^0.1.25",
+    "@langchain/openai": "^0.0.28",
+    "@langchain/anthropic": "^0.1.16",
+    "@langchain/google-genai": "^0.0.16",
+    "@langchain/community": "^0.0.47",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "winston": "^3.11.0",
+    "zod": "^3.22.4",
+    "bull": "^4.12.2",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

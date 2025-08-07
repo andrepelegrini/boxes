@@ -1,0 +1,313 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id          String @id @default(cuid())
+  email       String @unique
+  displayName String?
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastActive  DateTime @default(now())
+  
+  // Relationships
+  projects    Project[]
+  tasks       Task[]
+  documents   Document[]
+  events      Event[]
+  activityLogs ActivityLog[]
+  
+  @@map("users")
+}
+
+// Project Management
+model Project {
+  id              String @id @default(cuid())
+  name            String
+  description     String?
+  status          String @default("active") // active, on-shelf, archived
+  priority        String @default("medium") // low, medium, high, urgent
+  nextUp          Boolean @default(false)
+  
+  // Metadata
+  color           String?
+  tags            String? // JSON array of tags
+  estimatedHours  Float?
+  actualHours     Float?
+  
+  // Dates
+  startDate       DateTime?
+  dueDate         DateTime?
+  completedAt     DateTime?
+  lastReviewed    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Owner
+  userId          String
+  user            User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  tasks           Task[]
+  documents       Document[]
+  events          Event[]
+  checkIns        ProjectCheckIn[]
+  slackChannels   SlackChannel[]
+  
+  @@map("projects")
+}
+
+// Task Management
+model Task {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+  status      String @default("new") // new, in_progress, completed, blocked
+  priority    String @default("medium") // low, medium, high, urgent
+  
+  // Metadata
+  tags        String? // JSON array
+  estimatedHours Float?
+  actualHours Float?
+  
+  // Dates
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // AI Detection
+  detectedFromSlack Boolean @default(false)
+  slackMessageId    String?
+  confidence        Float?
+  
+  @@map("tasks")
+}
+
+// Document Management
+model Document {
+  id          String @id @default(cuid())
+  title       String
+  content     String?
+  type        String @default("note") // note, link, file
+  url         String?
+  filePath    String?
+  
+  // Metadata
+  tags        String? // JSON array
+  
+  // Dates
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("documents")
+}
+
+// Calendar/Event Management
+model Event {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  allDay      Boolean @default(false)
+  
+  // Metadata
+  location    String?
+  attendees   String? // JSON array
+  
+  // Dates
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("events")
+}
+
+// Project Check-ins
+model ProjectCheckIn {
+  id          String @id @default(cuid())
+  content     String
+  mood        String? // great, good, okay, struggling
+  blockers    String? // JSON array
+  nextSteps   String? // JSON array
+  
+  // Dates
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("project_check_ins")
+}
+
+// Activity Logging
+model ActivityLog {
+  id          String @id @default(cuid())
+  action      String
+  entityType  String // project, task, document, event
+  entityId    String
+  metadata    String? // JSON data
+  
+  // Dates
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("activity_logs")
+}
+
+// Slack Integration
+model SlackChannel {
+  id              String @id @default(cuid())
+  channelId       String @unique
+  channelName     String
+  teamId          String
+  teamName        String?
+  
+  // Configuration
+  isActive        Boolean @default(true)
+  autoSync        Boolean @default(false)
+  lastSyncAt      DateTime?
+  lastCursor      String?
+  
+  // Dates
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relationships
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  messages        SlackMessage[]
+  
+  @@map("slack_channels")
+}
+
+model SlackMessage {
+  id              String @id @default(cuid())
+  messageId       String @unique
+  text            String
+  user            String
+  timestamp       String
+  threadTs        String?
+  
+  // Processing
+  processedByLlm  Boolean @default(false)
+  workRelated     Boolean?
+  taskPriority    String?
+  extractedTasks  String? // JSON array
+  extractedEvents String? // JSON array
+  
+  // Dates
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relationships
+  channelId       String
+  channel         SlackChannel @relation(fields: [channelId], references: [channelId], onDelete: Cascade)
+  
+  @@map("slack_messages")
+}
+
+// WhatsApp Integration
+model WhatsAppMessage {
+  id              String @id @default(cuid())
+  messageId       String @unique
+  chatId          String
+  from            String
+  to              String?
+  body            String
+  type            String @default("text")
+  timestamp       BigInt
+  isGroupMsg      Boolean @default(false)
+  author          String?
+  hasMedia        Boolean @default(false)
+  receivedAt      DateTime @default(now())
+  
+  // Processing
+  processedByLlm  Boolean @default(false)
+  workRelated     Boolean?
+  taskPriority    String?
+  
+  // Dates
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("whatsapp_messages")
+}
+
+// Prompts and AI Configuration
+model Prompt {
+  id          String @id @default(cuid())
+  key         String @unique
+  title       String
+  content     String
+  category    String @default("general")
+  version     Int @default(1)
+  isActive    Boolean @default(true)
+  
+  // Usage tracking
+  usageCount  Int @default(0)
+  lastUsedAt  DateTime?
+  
+  // Dates
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("prompts")
+}
+
+// Settings/Configuration
+model Setting {
+  id        String @id @default(cuid())
+  key       String @unique
+  value     String
+  type      String @default("string") // string, number, boolean, json
+  
+  // Dates
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("settings")
+}
+
+// Slack Credentials
+model SlackCredential {
+  id          String   @id @default(cuid())
+  clientId    String   @unique
+  clientSecret String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("slack_credentials")
+}

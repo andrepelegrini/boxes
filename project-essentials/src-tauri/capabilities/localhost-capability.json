@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2.0.0",
+  "identifier": "localhost-capability", 
+  "description": "Allow IPC from localhost HTTPS during development",
+  "context": "local",
+  "windows": ["main"],
+  "webviews": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:default",
+    "core:app:default", 
+    "core:image:default",
+    "core:resources:default",
+    "core:menu:default",
+    "core:tray:default",
+    "shell:default",
+    "sql:default"
+  ],
+  "platforms": ["linux", "macOS", "windows"]
+}
