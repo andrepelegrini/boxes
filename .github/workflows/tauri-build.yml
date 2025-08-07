@@ -28,7 +28,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           run-id: ${{ github.event.workflow_run.id }}
-          path: sidecars            # será criado agora
+          path: sidecars
+          if-no-files-found: error      # ❶ força erro e mostra log se não baixar nada
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🗂️ List downloaded files (debug)
+        run: |
+          echo "Artifacts baixados:"
+          ls -R sidecars || echo "nenhum artefato encontrado"
 
       - name: 🚚 Move sidecars to src-tauri/bin
         run: |
