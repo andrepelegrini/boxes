@@ -22,6 +22,7 @@ jobs:
       - name: ⬇️ Download sidecar artifacts
         uses: actions/download-artifact@v4
         with:
+          run-id: ${{ github.event.workflow_run.id }}
           path: sidecars
 
       - name: 🚚 Move sidecars to src-tauri/bin
