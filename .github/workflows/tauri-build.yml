@@ -2,7 +2,6 @@
 name: Build desktop installers
 
 on:
-  # Executa quando o workflow de binários terminar (sucesso ou não).
   workflow_run:
     workflows: ["Build micro-service binaries (macOS-Linux-Windows)"]
     types: [completed]
@@ -20,42 +19,29 @@ jobs:
       - name: 📥 Checkout source
         uses: actions/checkout@v4
 
-      # ↓↓↓ 1) Baixa TODOS os artifacts gerados pelo workflow anterior
-      - name: ⬇️  Download sidecar artifacts
+      - name: ⬇️ Download sidecar artifacts
         uses: actions/download-artifact@v4
         with:
-          path: sidecars     # serão salvos em sidecars/**
+          path: sidecars
 
-      # ↓↓↓ 2) Move apenas os binários do SO atual p/ src-tauri/bin
-      - name: 🚚  Move sidecars to src-tauri/bin
+      - name: 🚚 Move sidecars to src-tauri/bin
         run: |
           mkdir -p src-tauri/bin
-          case "${{ runner.os }}" in
-            macOS)
-              mv sidecars/*-macos src-tauri/bin/
-              chmod +x src-tauri/bin/*-macos
-              ;;
-            Linux)
-              mv sidecars/*-ubuntu src-tauri/bin/
-              chmod +x src-tauri/bin/*-ubuntu
-              ;;
-            Windows)
-              mv sidecars\\*-windows.exe src-tauri\\bin\\
-              ;;
-          esac
+          mv sidecars/*-${{ runner.os }}* src-tauri/bin/
+          chmod +x src-tauri/bin/*
 
-      # ↓↓↓ 3) Build do front-end React/Next/etc.
-      - name: ⚙️  Setup Node 20
+      - name: ⚙️ Setup Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           cache: npm
-      - run: |
+
+      - name: 🛠️ Build front-end
+        run: |
           npm ci
           npm run build
 
-      # ↓↓↓ 4) Build & bundle Tauri
-      - name: 🛠️  Build Tauri app
+      - name: 🛠️ Build Tauri app
         uses: tauri-apps/tauri-action@v0.4
         with:
           args: >
@@ -65,8 +51,5 @@ jobs:
               "windows-latest":"x86_64-pc-windows-msvc"
             }')[matrix.os] }}
         env:
-          # (opcional) chaves para assinatura
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-
-      # Os instaladores ficarão disponíveis em "Artifacts" deste job.
