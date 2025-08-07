@@ -1,6 +1,11 @@
 # .github/workflows/tauri-build.yml
 name: Build desktop installers
 
+# ← PERMISSÕES NECESSÁRIAS p/ ler os artifacts do run anterior
+permissions:
+  actions: read
+  contents: read
+
 on:
   workflow_run:
     workflows: ["Build micro-service binaries (macOS-Linux-Windows)"]
@@ -23,7 +28,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           run-id: ${{ github.event.workflow_run.id }}
-          path: sidecars
+          path: sidecars            # será criado agora
 
       - name: 🚚 Move sidecars to src-tauri/bin
         run: |
