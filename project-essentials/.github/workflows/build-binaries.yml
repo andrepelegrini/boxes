@@ -3,8 +3,9 @@ name: Build micro-service binaries (macOS-Linux-Windows)
 
 on:
   push:
-    branches: [ feature/binarize-* ]
+    branches: [ main ]          # ← sua branch de trabalho
   pull_request:
+    branches: [ main ]
 
 jobs:
   pkg:
