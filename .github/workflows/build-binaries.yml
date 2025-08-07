@@ -35,12 +35,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ matrix.service }}/node_modules
-          key:  ${{ runner.os }}-node20-${{ hashFiles(format('{0}/package-lock.json', matrix.service)) }}
+          key:  ${{ runner.os }}-node18-${{ hashFiles(format('{0}/package-lock.json', matrix.service)) }}
 
-      - name: 🔧 Setup Node 20
+      - name: 🔧 Setup Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           cache: npm
 
       - name: 📜 Build TypeScript
@@ -53,9 +53,9 @@ jobs:
       - name: 🏷️  Set env PKG_TARGET / SUFFIX
         run: |
           case "${{ runner.os }}" in
-            macOS)   echo "PKG_TARGET=node20-macos"      >> "$GITHUB_ENV";;
-            Linux)   echo "PKG_TARGET=node20-linux-x64"  >> "$GITHUB_ENV";;
-            Windows) echo "PKG_TARGET=node20-win-x64"    >> "$GITHUB_ENV"; \
+            macOS)   echo "PKG_TARGET=node18-macos"      >> "$GITHUB_ENV";;
+            Linux)   echo "PKG_TARGET=node18-linux-x64"  >> "$GITHUB_ENV";;
+            Windows) echo "PKG_TARGET=node18-win-x64"    >> "$GITHUB_ENV"; \
                      echo "EXE_SUFFIX=.exe"             >> "$GITHUB_ENV";;
           esac
 
