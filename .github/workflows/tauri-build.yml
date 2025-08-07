@@ -27,7 +27,9 @@ jobs:
       - name: 🚚 Move sidecars to src-tauri/bin
         run: |
           mkdir -p src-tauri/bin
-          mv sidecars/*-${{ runner.os }}* src-tauri/bin/
+          for d in sidecars/*-${{ runner.os }}*; do
+            mv "$d"/* src-tauri/bin/
+          done
           chmod +x src-tauri/bin/*
 
       - name: ⚙️ Setup Node 18
