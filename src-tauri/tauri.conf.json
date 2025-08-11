@@ -29,7 +29,12 @@
     ],
     "security": {
       "csp": null,
-      "capabilities": ["main-capability", "localhost-capability", "dev-capability", "slack-capability"]
+      "capabilities": [
+        "main-capability",
+        "localhost-capability",
+        "dev-capability",
+        "slack-capability"
+      ]
     }
   },
   "bundle": {
@@ -49,7 +54,7 @@
     "macOS": {
       "minimumSystemVersion": "10.13",
       "entitlements": "entitlements.plist",
-      "exceptionDomain": "localhost"
+      "exceptionDomain": "*"
     }
   },
   "plugins": {

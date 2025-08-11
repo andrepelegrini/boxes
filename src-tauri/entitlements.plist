@@ -8,24 +8,20 @@
         <string>$(AppIdentifierPrefix)com.projectboxes.app</string>
         <string>$(AppIdentifierPrefix)project-boxes</string>
     </array>
-    
-    <!-- Network access for Slack OAuth -->
+
+    <!-- Outgoing network connections (e.g. connecting to AI providers, Slack, remote APIs) -->
     <key>com.apple.security.network.client</key>
     <true/>
-    
-    <!-- Outgoing network connections -->
+
+    <!-- Incoming network connections (e.g. local WebSocket server used by micro‑services) -->
     <key>com.apple.security.network.server</key>
     <true/>
-    
-    <!-- Allow HTTP/HTTPS -->
-    <key>com.apple.security.network.server</key>
-    <true/>
-    
-    <!-- File access for settings and cache -->
+
+    <!-- Allow the app to read and write user selected files.  This is used for settings, caches and any exported data. -->
     <key>com.apple.security.files.user-selected.read-write</key>
     <true/>
-    
-    <!-- Application data access -->
+
+    <!-- Application data groups for shared storage (e.g. between the app and helper processes) -->
     <key>com.apple.security.application-groups</key>
     <array>
         <string>group.com.projectboxes.app</string>

@@ -9,11 +9,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:analyze": "vite build && echo '\n📊 Bundle analysis available at: dist/stats.html\nOpen with: open dist/stats.html (macOS) or start dist/stats.html (Windows)'",
+    "build:analyze": "vite build && echo '\n Bundle analysis available at: dist/stats.html\nOpen with: open dist/stats.html (macOS) or start dist/stats.html (Windows)'",
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
+    "tauri:build:mac": "tauri build --target dmg",
     "reset:dev": "node scripts/reset-dev-state.js",
     "kill-ports": "node scripts/kill-ports.js",
     "kill-ports:all": "node scripts/kill-ports.js --include-dev-ports",
