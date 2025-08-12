@@ -49,3 +49,10 @@ tokio-cron-scheduler = "0.9"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-shell = "2"
+
+[package.metadata.tauri.bundle]
+identifier = "com.projectboxes.app"
+icon = [
+    "icons/icon.ico",
+    "icons/icon.png"
+]
