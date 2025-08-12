@@ -15,6 +15,8 @@ jobs:
   build:
     name: Build installers (Windows, macOS, Linux)
     runs-on: ${{ matrix.os }}
+    env:
+      TAURI_SIGNING_REQUIRED: "false"
     strategy:
       fail-fast: false
       matrix:
@@ -31,7 +33,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install frontend deps
         run: npm ci
@@ -39,12 +41,8 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Disable signing for Tauri
-        run: echo "TAURI_SIGNING_REQUIRED=false" >> $GITHUB_ENV
-        shell: bash
-
       - name: Install Linux system deps (GTK/WebKit/GLib)
-        if: matrix.os == 'ubuntu-latest'
+        if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev || sudo apt-get install -y libwebkit2gtk-4.0-dev
@@ -62,12 +60,20 @@ jobs:
           releaseDraft: false
           prerelease: false
 
-      - name: Gather built artifacts for site
-        if: always()
+      - name: Gather built artifacts for site (Unix)
+        if: ${{ runner.os != 'Windows' }}
         shell: bash
         run: |
           mkdir -p site/public/downloads/${{ matrix.platform }}
           find src-tauri/target -type f \( -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.msi" -o -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" \) -exec cp {} site/public/downloads/${{ matrix.platform }}/ \; || true
+
+      - name: Gather built artifacts for site (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "site/public/downloads/${{ matrix.platform }}" | Out-Null
+          Get-ChildItem -Path "src-tauri/target" -Recurse -Include *.dmg,*.app.tar.gz,*.msi,*.exe,*.deb,*.AppImage -ErrorAction SilentlyContinue `
+            | ForEach-Object { Copy-Item $_.FullName "site/public/downloads/${{ matrix.platform }}" -Force }
 
       - name: Upload site artifacts (per-platform)
         uses: actions/upload-artifact@v4
@@ -113,12 +119,10 @@ jobs:
         run: |
           set -e
           mkdir -p site/public
-          # Se houver site-src, copia; senão usa o que já está em site/public
           if [ -d site-src ]; then
             cp -R site-src/* site/public/
           fi
 
-          # 1) Garante index.html na RAIZ (fallback simples se não existir)
           if [ ! -f site/public/index.html ]; then
             cat > site/public/index.html <<'HTML'
 <!doctype html><html lang="pt-br"><meta charset="utf-8"><title>Downloads</title>
@@ -134,12 +138,10 @@ jobs:
 HTML
           fi
 
-          
           gen_index () {
             local dir="$1"
             mkdir -p "$dir"
             echo "<!doctype html><meta charset=\"utf-8\"><title>Downloads</title><body style='font-family:system-ui;padding:24px'><h2>Downloads: ${dir##*/}</h2><ul>" > "$dir/index.html"
-            
             shopt -s nullglob
             for f in "$dir"/*; do
               if [ -f "$f" ]; then
@@ -154,7 +156,6 @@ HTML
           gen_index site/public/downloads/macos
           gen_index site/public/downloads/linux
 
-          
           echo "==== SITE TREE ===="
           find site/public -maxdepth 3 -type f | sed 's/^/ - /'
 
