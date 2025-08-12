@@ -1,0 +1,106 @@
+name: Build installers and publish download site
+
+on:
+  push:
+    tags:
+      - "v*.*.*"   # publica quando criar uma tag de versão (ex: v0.1.0)
+  workflow_dispatch: # permite rodar manualmente
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build installers (Windows, macOS, Linux)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: macos
+          - os: windows-latest
+            platform: windows
+          - os: ubuntu-latest
+            platform: linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # Remove assinatura obrigatória para builds locais
+      - name: Disable signing for Tauri
+        run: echo "TAURI_SIGNING_REQUIRED=false" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build with Tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: ${{ github.ref_name }}
+          releaseDraft: false
+          prerelease: false
+
+      - name: Gather built artifacts for site
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p site/public/downloads/${{ matrix.platform }}
+          find src-tauri/target -type f \( -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.msi" -o -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" \) -exec cp {} site/public/downloads/${{ matrix.platform }}/ \; || true
+
+      - name: Upload site artifacts (per-platform)
+        uses: actions/upload-artifact@v4
+        with:
+          name: downloads-${{ matrix.platform }}
+          path: site/public/downloads/${{ matrix.platform }}
+
+  website:
+    name: Publish download site (GitHub Pages)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: downloads-macos
+          path: site/public/downloads/macos
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: downloads-windows
+          path: site/public/downloads/windows
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: downloads-linux
+          path: site/public/downloads/linux
+
+      - name: Place static site files
+        run: |
+          mkdir -p site/public
+          cp -R site-src/* site/public/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/public
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
