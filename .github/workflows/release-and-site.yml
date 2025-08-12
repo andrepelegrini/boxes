@@ -104,9 +104,31 @@ jobs:
           path: site/public/downloads/linux
 
       - name: Place static site files
+        shell: bash
         run: |
+          set -e
           mkdir -p site/public
-          cp -R site-src/* site/public/
+          if [ -d site-src ]; then
+            echo "site-src found → copying to site/public"
+            cp -R site-src/* site/public/
+          else
+            echo "site-src not found → using existing site/public"
+            # Garante que exista um index.html básico, caso tenha esquecido de commitar
+            if [ ! -f site/public/index.html ]; then
+              cat > site/public/index.html <<'HTML'
+<!doctype html><html lang="pt-br"><meta charset="utf-8"><title>Downloads</title>
+<body style="font-family:system-ui;padding:32px">
+  <h1>Downloads do Project Boxes</h1>
+  <p>Escolha seu sistema:</p>
+  <ul>
+    <li><a href="./downloads/windows/">Windows</a></li>
+    <li><a href="./downloads/macos/">macOS</a></li>
+    <li><a href="./downloads/linux/">Linux</a></li>
+  </ul>
+</body></html>
+HTML
+            fi
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
