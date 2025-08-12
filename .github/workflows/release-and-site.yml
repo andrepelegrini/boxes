@@ -43,6 +43,17 @@ jobs:
       - name: Disable signing for Tauri
         run: echo "TAURI_SIGNING_REQUIRED=false" >> $GITHUB_ENV
         shell: bash
+      
+      - name: Install Linux system deps (GTK/WebKit/GLib)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          # WebKitGTK (a 4.1 é a atual; cai para 4.0 se não houver no runner)
+          sudo apt-get install -y libwebkit2gtk-4.1-dev || sudo apt-get install -y libwebkit2gtk-4.0-dev
+          # GTK + GLib + indicadores + SVG + utilidades de linkagem/empacote
+          sudo apt-get install -y \
+            libgtk-3-dev libglib2.0-dev libayatana-appindicator3-dev \
+            librsvg2-dev patchelf pkg-config build-essential
 
       - name: Build with Tauri
         uses: tauri-apps/tauri-action@v0
