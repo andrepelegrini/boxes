@@ -43,14 +43,12 @@ jobs:
       - name: Disable signing for Tauri
         run: echo "TAURI_SIGNING_REQUIRED=false" >> $GITHUB_ENV
         shell: bash
-      
+
       - name: Install Linux system deps (GTK/WebKit/GLib)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          # WebKitGTK (a 4.1 é a atual; cai para 4.0 se não houver no runner)
           sudo apt-get install -y libwebkit2gtk-4.1-dev || sudo apt-get install -y libwebkit2gtk-4.0-dev
-          # GTK + GLib + indicadores + SVG + utilidades de linkagem/empacote
           sudo apt-get install -y \
             libgtk-3-dev libglib2.0-dev libayatana-appindicator3-dev \
             librsvg2-dev patchelf pkg-config build-essential
@@ -82,6 +80,13 @@ jobs:
     name: Publish download site (GitHub Pages)
     runs-on: ubuntu-latest
     needs: build
+    # recomendado pra evitar deploys concorrentes do Pages
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -103,6 +108,10 @@ jobs:
           name: downloads-linux
           path: site/public/downloads/linux
 
+      # Novo: configurar o Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Place static site files
         shell: bash
         run: |
@@ -113,7 +122,7 @@ jobs:
             cp -R site-src/* site/public/
           else
             echo "site-src not found → using existing site/public"
-            # Garante que exista um index.html básico, caso tenha esquecido de commitar
+            # Garante index.html se esquecer de commitar
             if [ ! -f site/public/index.html ]; then
               cat > site/public/index.html <<'HTML'
 <!doctype html><html lang="pt-br"><meta charset="utf-8"><title>Downloads</title>
@@ -136,4 +145,5 @@ HTML
           path: site/public
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
