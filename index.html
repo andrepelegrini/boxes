@@ -1,46 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="pt-br" data-owner="andrepelegrini" data-repo="boxes">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Boxes</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Project Boxes — Downloads</title>
+  <meta name="color-scheme" content="dark light">
+  <style>
+    :root{
+      --ink:#0b0e10; --card:#11141a; --text:#fffaf0; --accent:#F5D16D; --muted:#a9adb3;
+      --ok:#22c55e; --warn:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial}
+    .wrap{max-width:960px;margin:auto;padding:32px}
+    .hero{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:24px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:14px;border:3px solid var(--accent);display:grid;place-items:center}
+    .logo b{font-size:28px;color:var(--accent)}
+    h1{margin:0;font-size:28px}
+    .subtitle{margin:6px 0 0;color:var(--muted)}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr; margin-top:16px}
+    @media(min-width:820px){ .grid{grid-template-columns:repeat(3,1fr)} }
+    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 16px 60px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;min-height:260px}
+    .os{display:flex;align-items:center;gap:10px}
+    .os .badge{font-weight:700;background:var(--accent);color:var(--ink);padding:6px 10px;border-radius:999px}
+    .small{color:var(--muted);font-size:13px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 14px;background:var(--accent);color:var(--ink);font-weight:700;text-decoration:none}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    ul.assets{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto}
+    .asset{display:flex;justify-content:space-between;gap:8px;background:#0f1217;border:1px solid #20242d;border-radius:12px;padding:10px}
+    .asset a{color:var(--text);text-decoration:none}
+    .foot{margin-top:20px;color:var(--muted);font-size:13px}
+    .note{display:flex;gap:8px;align-items:center}
+    .ok{color:var(--ok)} .warn{color:var(--warn)}
+    .center{text-align:center;margin:22px 0}
+    .skeleton{height:36px;background:#0e1116;border-radius:10px;animation:pulse 1.4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+    .links-row{display:flex;gap:10px;flex-wrap:wrap}
+    .muted-link{color:var(--muted)}
+  </style>
 </head>
-<body class="bg-background text-foreground antialiased">
-  <div id="root"></div>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand">
+        <div class="logo"><b>B</b></div>
+        <div>
+          <h1>Project Boxes — Downloads</h1>
+          <p class="subtitle">Baixe a versão mais recente para o seu sistema. Sem terminal, só clicar e abrir.</p>
+        </div>
+      </div>
+      <div class="links-row">
+        <a id="releaseLink" class="muted-link" href="#" target="_blank" rel="noopener">Ver no GitHub Releases →</a>
+      </div>
+    </header>
+
+    <section class="grid" id="cards">
+      <!-- Windows -->
+      <div class="card" id="winCard">
+        <div class="os"><span class="badge">Windows</span> <span class="small">.exe / .msi</span></div>
+        <div id="winBtnWrap"><button class="btn" id="winPrimary" disabled>Carregando…</button></div>
+        <ul class="assets" id="winList">
+          <li class="skeleton"></li><li class="skeleton"></li>
+        </ul>
+        <div class="foot">
+          <div class="note warn">Se aparecer SmartScreen, clique em “More info” → “Run anyway”.</div>
+        </div>
+      </div>
+
+      <!-- macOS -->
+      <div class="card" id="macCard">
+        <div class="os"><span class="badge">macOS</span> <span class="small">.dmg / .app.tar.gz</span></div>
+        <div id="macBtnWrap"><button class="btn" id="macPrimary" disabled>Carregando…</button></div>
+        <ul class="assets" id="macList">
+          <li class="skeleton"></li><li class="skeleton"></li>
+        </ul>
+        <div class="foot">
+          <div class="note warn">Se o Gatekeeper bloquear: clique com o botão direito → “Abrir”.</div>
+        </div>
+      </div>
+
+      <!-- Linux -->
+      <div class="card" id="linuxCard">
+        <div class="os"><span class="badge">Linux</span> <span class="small">.AppImage / .deb</span></div>
+        <div id="linuxBtnWrap"><button class="btn" id="linuxPrimary" disabled>Carregando…</button></div>
+        <ul class="assets" id="linuxList">
+          <li class="skeleton"></li><li class="skeleton"></li>
+        </ul>
+        <div class="foot small">
+          <div class="note ok">AppImage: tornar executável (chmod +x) e executar.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="center small">
+      Se algo falhar, use os diretórios estáticos: 
+      <a href="./downloads/windows/">Windows</a> ·
+      <a href="./downloads/macos/">macOS</a> ·
+      <a href="./downloads/linux/">Linux</a>
+    </div>
+  </div>
+
   <script>
-    // Track when the page starts loading
-    console.log(`[${new Date().toISOString()}] 🌐 [HTML] Page loading started`);
-    
-    // Track when DOM content is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log(`[${new Date().toISOString()}] 🌐 [HTML] DOM content loaded`);
-    });
-    
-    // Track when page is fully loaded
-    window.addEventListener('load', () => {
-      console.log(`[${new Date().toISOString()}] 🌐 [HTML] Page fully loaded`);
-    });
-    
-    // Monitor for React mounting
-    const checkReactMount = () => {
-      const root = document.getElementById('root');
-      if (root && root.children.length > 0) {
-        console.log(`[${new Date().toISOString()}] ✅ [HTML] React app mounted successfully`);
-        clearInterval(reactMountCheck);
+    (async () => {
+      const owner = document.documentElement.dataset.owner || 'andrepelegrini';
+      const repo  = document.documentElement.dataset.repo  || 'boxes';
+      const api = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
+
+      const $ = (s) => document.querySelector(s);
+      const byOS = {
+        windows: (n) => /\.(exe|msi)$/i.test(n),
+        mac:     (n) => /\.(dmg|app\.tar\.gz)$/i.test(n),
+        linux:   (n) => /\.(AppImage|deb)$/i.test(n)
+      };
+
+      const formatSize = (b) => {
+        if (!+b) return '';
+        const u = ['B','KB','MB','GB'];
+        let i = 0; let s = +b;
+        while (s >= 1024 && i < u.length-1){ s/=1024; i++; }
+        return `${s.toFixed( (i?1:0) )} ${u[i]}`;
+      };
+
+      const fillList = (id, assets) => {
+        const list = $(id);
+        list.innerHTML = '';
+        if (!assets.length){
+          list.innerHTML = '<li class="small" style="opacity:.8">Nenhum artefato encontrado nesta release.</li>';
+          return;
+        }
+        for (const a of assets){
+          const li = document.createElement('li');
+          li.className = 'asset';
+          li.innerHTML = `
+            <a href="${a.browser_download_url}" download>${a.name}</a>
+            <span class="small">${formatSize(a.size)}</span>
+          `;
+          list.appendChild(li);
+        }
+      };
+
+      const setPrimary = (wrapId, btnId, firstUrl, label) => {
+        const wrap = $(wrapId);
+        wrap.innerHTML = '';
+        const a = document.createElement('a');
+        a.className = 'btn';
+        a.href = firstUrl;
+        a.textContent = label;
+        wrap.appendChild(a);
+      };
+
+      try {
+        const res = await fetch(api, { headers: { 'Accept': 'application/vnd.github+json' }});
+        if (!res.ok) throw new Error('GitHub API error');
+        const release = await res.json();
+
+        const assets = (release.assets || []);
+        $('#releaseLink').href = `https://github.com/${owner}/${repo}/releases/tag/${release.tag_name}`;
+
+        const win = assets.filter(a => byOS.windows(a.name));
+        const mac = assets.filter(a => byOS.mac(a.name));
+        const linux = assets.filter(a => byOS.linux(a.name));
+
+        fillList('#winList', win);
+        fillList('#macList', mac);
+        fillList('#linuxList', linux);
+
+        if (win[0]) setPrimary('#winBtnWrap', '#winPrimary', win[0].browser_download_url, 'Baixar para Windows');
+        else $('#winBtnWrap').innerHTML = '<a class="btn" href="./downloads/windows/">Ver downloads</a>';
+
+        if (mac[0]) setPrimary('#macBtnWrap', '#macPrimary', mac[0].browser_download_url, 'Baixar para macOS');
+        else $('#macBtnWrap').innerHTML = '<a class="btn" href="./downloads/macos/">Ver downloads</a>';
+
+        if (linux[0]) setPrimary('#linuxBtnWrap', '#linuxPrimary', linux[0].browser_download_url, 'Baixar para Linux');
+        else $('#linuxBtnWrap').innerHTML = '<a class="btn" href="./downloads/linux/">Ver downloads</a>';
+
+      } catch (e) {
+        // fallback total: sem API → mantém botões que levam às pastas
+        $('#winBtnWrap').innerHTML   = '<a class="btn" href="./downloads/windows/">Ver downloads</a>';
+        $('#macBtnWrap').innerHTML   = '<a class="btn" href="./downloads/macos/">Ver downloads</a>';
+        $('#linuxBtnWrap').innerHTML = '<a class="btn" href="./downloads/linux/">Ver downloads</a>';
+        ['#winList','#macList','#linuxList'].forEach(id => $(id).innerHTML =
+          '<li class="small" style="opacity:.8">Não foi possível consultar a release. Use os links acima.</li>'
+        );
       }
-    };
-    
-    const reactMountCheck = setInterval(checkReactMount, 100);
-    
-    // Stop checking after 10 seconds
-    setTimeout(() => {
-      clearInterval(reactMountCheck);
-      const root = document.getElementById('root');
-      if (!root || root.children.length === 0) {
-        console.error(`[${new Date().toISOString()}] ❌ [HTML] React app failed to mount within 10 seconds`);
-      }
-    }, 10000);
+    })();
   </script>
-  <script type="module" src="./index.tsx"></script>
 </body>
 </html>
