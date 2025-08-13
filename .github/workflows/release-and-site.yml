@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -64,16 +64,17 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         shell: bash
         run: |
-          mkdir -p site/public/downloads/${{ matrix.platform }}
-          find src-tauri/target -type f \( -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.msi" -o -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" \) -exec cp {} site/public/downloads/${{ matrix.platform }}/ \; || true
+          mkdir -p "site/public/downloads/${{ matrix.platform }}"
+          find src-tauri/target -type f \( -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.msi" -o -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" \) \
+            -exec cp {} "site/public/downloads/${{ matrix.platform }}/" \; || true
 
       - name: Gather built artifacts for site (Windows)
         if: ${{ runner.os == 'Windows' }}
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "site/public/downloads/${{ matrix.platform }}" | Out-Null
-          Get-ChildItem -Path "src-tauri/target" -Recurse -Include *.dmg,*.app.tar.gz,*.msi,*.exe,*.deb,*.AppImage -ErrorAction SilentlyContinue `
-            | ForEach-Object { Copy-Item $_.FullName "site/public/downloads/${{ matrix.platform }}" -Force }
+          Get-ChildItem -Path "src-tauri/target" -Recurse -Include *.dmg,*.app.tar.gz,*.msi,*.exe,*.deb,*.AppImage -ErrorAction SilentlyContinue |
+            ForEach-Object { Copy-Item $_.FullName "site/public/downloads/${{ matrix.platform }}" -Force }
 
       - name: Upload site artifacts (per-platform)
         uses: actions/upload-artifact@v4
@@ -117,47 +118,24 @@ jobs:
       - name: Place static site files
         shell: bash
         run: |
-          set -e
           mkdir -p site/public
-          if [ -d site-src ]; then
-            cp -R site-src/* site/public/
-          fi
+          if [ -d site-src ]; then cp -R site-src/* site/public/; fi
 
-          if [ ! -f site/public/index.html ]; then
-            cat > site/public/index.html <<'HTML'
-<!doctype html><html lang="pt-br"><meta charset="utf-8"><title>Downloads</title>
-<body style="font-family:system-ui;padding:32px">
-  <h1>Downloads do Project Boxes</h1>
-  <p>Escolha seu sistema:</p>
-  <ul>
-    <li><a href="./downloads/windows/">Windows</a></li>
-    <li><a href="./downloads/macos/">macOS</a></li>
-    <li><a href="./downloads/linux/">Linux</a></li>
-  </ul>
-</body></html>
-HTML
-          fi
-
-          gen_index () {
-            local dir="$1"
+          # cria índices simples nas pastas de downloads (sem heredoc)
+          for os in windows macos linux; do
+            dir="site/public/downloads/$os"
             mkdir -p "$dir"
-            echo "<!doctype html><meta charset=\"utf-8\"><title>Downloads</title><body style='font-family:system-ui;padding:24px'><h2>Downloads: ${dir##*/}</h2><ul>" > "$dir/index.html"
-            shopt -s nullglob
-            for f in "$dir"/*; do
-              if [ -f "$f" ]; then
-                bn="$(basename "$f")"
-                echo "<li><a href=\"./$bn\">$bn</a></li>" >> "$dir/index.html"
-              fi
-            done
-            echo "</ul><p><a href='../../index.html'>&larr; Voltar</a></p></body>" >> "$dir/index.html"
-          }
-
-          gen_index site/public/downloads/windows
-          gen_index site/public/downloads/macos
-          gen_index site/public/downloads/linux
-
-          echo "==== SITE TREE ===="
-          find site/public -maxdepth 3 -type f | sed 's/^/ - /'
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>Downloads</title>'
+              echo '<body style="font-family:system-ui;padding:24px"><h2>Downloads: '"$os"'</h2><ul>'
+              for f in "$dir"/*; do
+                [ -f "$f" ] || continue
+                bn=$(basename "$f")
+                echo '<li><a href="./'"$bn"'">'"$bn"'</a></li>'
+              done
+              echo '</ul><p><a href="../../index.html">&larr; Voltar</a></p></body>'
+            } > "$dir/index.html"
+          done
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
