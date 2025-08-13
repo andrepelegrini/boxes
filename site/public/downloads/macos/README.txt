@@ -1,0 +1,1 @@
+Este diretório será preenchido automaticamente pelo workflow de CI/CD com os instaladores .dmg ou .app para macOS.

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br" data-owner="andrepelegrini" data-repo="boxes">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Project Boxes — Downloads</title>
+  <meta name="color-scheme" content="dark light">
+  <style>
+    :root{--ink:#0b0e10;--card:#11141a;--text:#fffaf0;--accent:#F5D16D;--muted:#a9adb3}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    .wrap{max-width:960px;margin:auto;padding:32px}
+    .hero{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:24px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:14px;border:3px solid var(--accent);display:grid;place-items:center}
+    .logo b{font-size:28px;color:var(--accent)}
+    h1{margin:0;font-size:28px}
+    .subtitle{margin:6px 0 0;color:var(--muted)}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr;margin-top:16px}
+    @media(min-width:820px){.grid{grid-template-columns:repeat(3,1fr)}}
+    .card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 16px 60px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;min-height:260px}
+    .os{display:flex;align-items:center;gap:10px}
+    .badge{font-weight:700;background:var(--accent);color:var(--ink);padding:6px 10px;border-radius:999px}
+    .small{color:var(--muted);font-size:13px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 14px;background:var(--accent);color:var(--ink);font-weight:700;text-decoration:none}
+    ul.assets{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto}
+    .asset{display:flex;justify-content:space-between;gap:8px;background:#0f1217;border:1px solid #20242d;border-radius:12px;padding:10px}
+    .asset a{color:var(--text);text-decoration:none}
+    .center{text-align:center;margin:22px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand">
+        <div class="logo"><b>B</b></div>
+        <div>
+          <h1>Project Boxes — Downloads</h1>
+          <p class="subtitle">Baixe a versão mais recente para o seu sistema. Sem terminal, só clicar e abrir.</p>
+        </div>
+      </div>
+      <a id="releaseLink" class="small" href="#" target="_blank" rel="noopener">Ver no GitHub Releases →</a>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <div class="os"><span class="badge">Windows</span> <span class="small">.exe / .msi</span></div>
+        <div id="winBtnWrap"><a class="btn" href="./downloads/windows/">Ver downloads</a></div>
+        <ul class="assets" id="winList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="os"><span class="badge">macOS</span> <span class="small">.dmg / .app.tar.gz</span></div>
+        <div id="macBtnWrap"><a class="btn" href="./downloads/macos/">Ver downloads</a></div>
+        <ul class="assets" id="macList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="os"><span class="badge">Linux</span> <span class="small">.AppImage / .deb</span></div>
+        <div id="linuxBtnWrap"><a class="btn" href="./downloads/linux/">Ver downloads</a></div>
+        <ul class="assets" id="linuxList"></ul>
+      </div>
+    </section>
+
+    <div class="center small">
+      Se algo falhar, use os diretórios estáticos acima.
+    </div>
+  </div>
+
+  <script>
+    (async () => {
+      const owner = document.documentElement.dataset.owner || 'andrepelegrini';
+      const repo  = document.documentElement.dataset.repo  || 'boxes';
+      const api = `https://api.github.com/repos/${owner}/${repo}/releases/latest`;
+      const $ = (s) => document.querySelector(s);
+      const byOS = {
+        windows: (n) => /\.(exe|msi)$/i.test(n),
+        mac:     (n) => /\.(dmg|app\.tar\.gz)$/i.test(n),
+        linux:   (n) => /\.(AppImage|deb)$/i.test(n)
+      };
+      const formatSize = (b) => {
+        if (!+b) return '';
+        const u = ['B','KB','MB','GB']; let i=0, s=+b;
+        while (s>=1024 && i<u.length-1){ s/=1024; i++; }
+        return `${s.toFixed(i?1:0)} ${u[i]}`;
+      };
+      const fillList = (id, assets) => {
+        const list = $(id); list.innerHTML = '';
+        for (const a of assets){
+          const li = document.createElement('li');
+          li.className = 'asset';
+          li.innerHTML = `<a href="${a.browser_download_url}" download>${a.name}</a><span class="small">${formatSize(a.size)}</span>`;
+          list.appendChild(li);
+        }
+      };
+      try {
+        const r = await fetch(api, { headers: { 'Accept': 'application/vnd.github+json' }});
+        if (!r.ok) return;
+        const release = await r.json();
+        $('#releaseLink').href = `https://github.com/${owner}/${repo}/releases/tag/${release.tag_name}`;
+        const assets = release.assets || [];
+        fillList('#winList', assets.filter(a => byOS.windows(a.name)));
+        fillList('#macList', assets.filter(a => byOS.mac(a.name)));
+        fillList('#linuxList', assets.filter(a => byOS.linux(a.name)));
+      } catch {}
+    })();
+  </script>
+</body>
+</html>
